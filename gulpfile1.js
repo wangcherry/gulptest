@@ -2,7 +2,7 @@
 var gulp = require('gulp'),
     //获取参数
     argv = require('yargs').argv,
-    //
+    //同步执行shell代码，用于脚本语言，不在服务器代码使用？
     exec = require('sync-exec'),
     //提供一些操作系统相关的方法
     os = require('os'),
@@ -10,27 +10,36 @@ var gulp = require('gulp'),
     fs = require('fs'),
     //处理文件路径
     path = require('path'),
-    //
+    //文件中加了特定注释的文件区块进行合并，但是不压缩
     useref = require('gulp-useref'),
+    //根据条件过滤内容
     gulpif = require('gulp-if'),
+    //清理文件或者文件夹
     clean = require('gulp-clean'),
-    //合并压缩文件
+    //压缩文件
     uglify = require('gulp-uglify'),
+    //
     ngAnnotate = require('gulp-ng-annotate'),
+    //压缩css,最终调用的是clean-css
     minifyCss = require('gulp-minify-css'),
+    //压缩 PNG, JPEG, GIF and SVG 图片
     imagemin = require('gulp-imagemin'),
+    //使用pngquant深度压缩png图片的imagemin插件
     pngquant = require('imagemin-pngquant'),
+    //为静态资源添加版本号，生成manifest.json文件
     rev = require('gulp-rev'),
+    //根据manifest.json文件替换html,ftl中对应的路径
     revReplace = require('gulp-rev-replace'),
+    //按顺序的执行一些了任务
     runSequence = require('run-sequence');
 
 // dev server
-var livereload = require('gulp-livereload'),
-    express = require('express'),
-    body = require('body-parser'),
-    openurl = require('openurl'),
-    tinylr = require('tiny-lr'),
-    ftl2html = require('ftl2html'),
+var livereload = require('gulp-livereload'),//实时刷新页面
+    express = require('express'),//平台，快速、开放、极简的 web 开发框架
+    body = require('body-parser'),//bodyParser中间件用来解析http请求体，是express默认使用的中间件之一
+    openurl = require('openurl'),//在默认浏览器中打开一个页面
+    tinylr = require('tiny-lr'),//小型热刷新
+    ftl2html = require('ftl2html'),//将freemarker转换成html
     server = tinylr();
 
 // deploy git
@@ -49,7 +58,7 @@ var tmp2 = path.join(appConfig.tmpDir, 'step2');
 var webappDir = appConfig.webapp;
 // template
 var templateDir = path.join(webappDir, appConfig.templatePath)
-    // mock dir
+// mock dir
 var mockDir = appConfig.mock;
 // build dir
 var buildDir = appConfig.build;
@@ -113,7 +122,7 @@ gulp.task('compass', function(cb) {
     cb();
 });
 
-
+//将页面的js与css合并，再压缩
 /***------------- useref start ---------------***/
 var uglifyJs = function(file) {
     if (/\-min.js$/.test(file.path)) {
